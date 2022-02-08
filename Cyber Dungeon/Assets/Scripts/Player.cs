@@ -9,22 +9,38 @@ public class Player : MonoBehaviour
 
     GameObject obj;
 
+    bool isJump = false;
+
+    [SerializeField]
+    float jumpForce = 200f;
+
+    Rigidbody rb;
+
+
     // Start is called before the first frame update
     void Start()
     {
         obj = (GameObject)Instantiate(HitPointObject,
                 Vector3.zero,
                 Quaternion.identity);
+
+        rb = this.GetComponent<Rigidbody>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        Movement();
+        MoveUpdate();
         TurnMousePosition();
     }
 
-    void Movement()
+    void MoveUpdate()
+    {
+        Move();
+        Jump();
+    }
+
+    void Move()
     {
         float speed = 0.005f;
 
@@ -56,6 +72,18 @@ public class Player : MonoBehaviour
         this.transform.position += move;
     }
 
+    void Jump()
+    {
+        if(Input.GetKeyDown(KeyCode.Space))
+        {
+            if(!isJump)
+            {
+                isJump = true;
+                rb.AddForce(new Vector3(0, jumpForce, 0));
+            }
+        }
+    }
+
     void TurnMousePosition()
     {
         // マウス位置座標取得
@@ -73,7 +101,21 @@ public class Player : MonoBehaviour
             obj.transform.position = hit.point;
         }
 
+        Vector3 point = hit.point;
+        point.y = this.transform.position.y;
+
         // 床にレイがぶつかった方向を向く
-        this.transform.LookAt(hit.point);
+        this.transform.LookAt(point);
+    }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        int layer = collision.gameObject.layer;
+
+        // Layer9 (Ground)
+        if(layer == 9)
+        {
+            isJump = false;
+        }
     }
 }
