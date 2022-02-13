@@ -14,6 +14,9 @@ public class MapCreator : MonoBehaviour
     int MaxRoom = 10;
 
     [SerializeField]
+    GameObject playerObject;
+
+    [SerializeField]
     GameObject floorPrefab;
 
     private int[,] map;
@@ -21,6 +24,7 @@ public class MapCreator : MonoBehaviour
     void Start()
     {
         GenerateMap();
+        SpawnPlayer();
     }
 
     void GenerateMap()
@@ -39,5 +43,23 @@ public class MapCreator : MonoBehaviour
                 }
             }
         }
+    }
+
+    void SpawnPlayer()
+    {
+        if (!playerObject)
+        {
+            return;
+        }
+
+        Position position;
+        do
+        {
+            var x = RogueUtils.GetRandomInt(0, MapSizeX - 1);
+            var y = RogueUtils.GetRandomInt(0, MapSizeY - 1);
+            position = new Position(x, y);
+        } while (map[position.X, position.Y] != 1);
+
+        playerObject.transform.position = new Vector3(position.X, 1, position.Y);
     }
 }
