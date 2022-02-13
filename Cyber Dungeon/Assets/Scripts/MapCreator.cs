@@ -19,12 +19,30 @@ public class MapCreator : MonoBehaviour
     [SerializeField]
     GameObject floorPrefab;
 
+    [SerializeField]
+    GameObject nextFloorObject;
+
+
+    // <private value>
+
     private int[,] map;
+
+    private Position playerPosition;
+    private Position nextFloorPosition;
 
     void Start()
     {
+        Generate();
+    }
+
+    public void Generate()
+    {
+        MapDelete();
+
         GenerateMap();
+
         SpawnPlayer();
+        SpawnNextFloor();
     }
 
     void GenerateMap()
@@ -39,9 +57,18 @@ public class MapCreator : MonoBehaviour
             {
                 if (map[x, y] == 1)
                 {
-                    Instantiate(floorPrefab, new Vector3(x, 0, y), new Quaternion());
+                    GameObject obj = Instantiate(floorPrefab, new Vector3(x, 0, y), new Quaternion());
+                    obj.transform.parent = this.transform;
                 }
             }
+        }
+    }
+
+    void MapDelete()
+    {
+        foreach (Transform obj in gameObject.transform)
+        {
+            GameObject.Destroy(obj.gameObject);
         }
     }
 
@@ -61,5 +88,26 @@ public class MapCreator : MonoBehaviour
         } while (map[position.X, position.Y] != 1);
 
         playerObject.transform.position = new Vector3(position.X, 1, position.Y);
+        playerPosition = position;
     }
+
+    void SpawnNextFloor()
+    {
+        if (!nextFloorObject)
+        {
+            return;
+        }
+
+        Position position;
+        do
+        {
+            var x = RogueUtils.GetRandomInt(0, MapSizeX - 1);
+            var y = RogueUtils.GetRandomInt(0, MapSizeY - 1);
+            position = new Position(x, y);
+        } while ((map[position.X, position.Y] != 1) && (position != playerPosition));
+
+        nextFloorObject.transform.position = new Vector3(position.X, 1, position.Y);
+        nextFloorPosition = position;
+    }
+
 }
